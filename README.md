@@ -8,10 +8,10 @@ Instantly verifies and displays the correctness of the user's answer
 Tracks and displays the user's score based on correct and incorrect answers
 
 ### Technologies Used
-Python
-Flask
-HTML
-CSS
+Python,
+Flask,
+HTML,
+CSS,
 JavaScript
 
 ### License
