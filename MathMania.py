@@ -2,50 +2,49 @@ from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 import random
 
-app = Flask(__name__)
-CORS(app)
+class Server():
+    def __init__(self):
+        self.app = Flask(__name__)
+        CORS(self.app)
+        self.router()
+        self.points = 0
 
-points = 0
+    def router(self):
+        self.app.route('/', methods=['GET'])(self.index)
+        self.app.route('/points-add', methods=['PUT'])(self.points_add)
+        self.app.route('/points-sub', methods=['PUT'])(self.points_sub)
+        self.app.route('/generate-question', methods=['GET'])(self.generate_question)
 
-@app.route('/')
-def index():
-    return render_template("index.html")
+    def index(self):
+        return render_template("index.html")
+    
+    def points_add(self):
+        self.points = self.points + 3
+        return jsonify({"success": True})
+    
+    def points_sub(self):
+        self.points = self.points - 1
+        return jsonify({"success": True})
+    
+    def generate_question(self):
+        num1 = random.randint(1, 19)
+        num2 = random.randint(2, 20)
 
-@app.route('/points-add', methods=['GET'])
-def points_add():
-    global points
-    points = points + 3
+        question = f"What is {num1} x {num2}?"
+        answer = num1 * num2
+        answers = [answer]
 
-@app.route('/points-sub', methods=['GET'])
-def points_sub():
-    global points
-    points = points - 1
+        for i in range(3):
+            fake_answer = answer + random.randint(1,10)
+            while fake_answer == answer or fake_answer in answers:
+                fake_answer = answer - random.randint(1,10)
+            answers.append(fake_answer)
 
-@app.route('/generate-question', methods=['GET'])
-def generate_question():
-    num1 = random.randint(1, 19)
-    num2 = random.randint(2, 20)
+        random.shuffle(answers)
 
-    question = f"What is {num1} x {num2}?"
-    answer = num1 * num2
-    answers = [answer]  # Initialize the answers list
-
-    for i in range(3):  # Generate three fake options
-        fake_answer = answer + random.randint(1,10)
-        while fake_answer == answer or fake_answer in answers:
-            fake_answer = answer - random.randint(1,10)
-        answers.append(fake_answer)
-
-    random.shuffle(answers)
-
-    # Return the question, options, and points as a JSON response
-    return jsonify({
-        "options": answers,
-        "question": question,
-        "answer": answer,
-        "points": points
-    })
-
-
-if __name__ == '__main__':
-    app.run(host="0.0.0.0")
+        return jsonify({
+            "options": answers,
+            "question": question,
+            "answer": answer,
+            "points": self.points
+        })
